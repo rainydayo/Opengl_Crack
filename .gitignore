@@ -42,5 +42,6 @@ install
 .idea
 cmake-*
 
-# remove biult folder
+# remove built folder
 **/bin/
+build/

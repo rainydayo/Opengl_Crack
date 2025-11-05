@@ -1,6 +1,0 @@
-﻿  main.cpp
-C:\Users\nawatpim\Downloads\opengl-starter\src\main.cpp(52,1): warning C4566: character represented by universal-character-name '\u00B1' cannot be represented in the current code page (874)
-C:\Users\nawatpim\Downloads\opengl-starter\src\main.cpp(54,1): warning C4566: character represented by universal-character-name '\u00B1' cannot be represented in the current code page (874)
-C:\Users\nawatpim\Downloads\opengl-starter\src\main.cpp(56,1): warning C4566: character represented by universal-character-name '\u00B1' cannot be represented in the current code page (874)
-C:\Users\nawatpim\Downloads\opengl-starter\src\main.cpp(153,1): warning C4566: character represented by universal-character-name '\u2192' cannot be represented in the current code page (874)
-  opengl-starter.vcxproj -> C:\Users\nawatpim\Downloads\opengl-starter\build\bin\Debug\opengl-starter.exe

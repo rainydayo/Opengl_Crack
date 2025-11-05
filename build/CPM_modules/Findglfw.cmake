@@ -1,3 +1,0 @@
-include("C:/Users/nawatpim/Downloads/opengl-starter/build/cmake/CPM_0.38.7.cmake")
-CPMAddPackage("NAME;glfw;VERSION;3.3.10;GITHUB_REPOSITORY;glfw/glfw;GIT_TAG;3.3.10;OPTIONS;BUILD_SHARED_LIBS ON;GLFW_BUILD_EXAMPLES OFF;GLFW_BUILD_TESTS OFF;GLFW_BUILD_DOCS OFF")
-set(glfw_FOUND TRUE)

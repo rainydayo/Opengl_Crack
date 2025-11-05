@@ -1,3 +1,0 @@
-C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/groupsourcesbyfolder.cmake-populate.dir
-C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/ALL_BUILD.dir
-C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/ZERO_CHECK.dir

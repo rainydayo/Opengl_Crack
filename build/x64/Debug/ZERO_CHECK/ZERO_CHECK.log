@@ -1,0 +1,145 @@
+﻿  Checking File Globs
+  -- GLOB mismatch!
+  1>Checking Build System
+  CMake is re-running because C:/Users/nawatpim/Downloads/opengl-starter/build/CMakeFiles/generate.stamp is out-of-date.
+    the file 'C:/Users/nawatpim/Downloads/opengl-starter/build/CMakeFiles/cmake.verify_globs'
+    is newer than 'C:/Users/nawatpim/Downloads/opengl-starter/build/CMakeFiles/generate.stamp.depend'
+    result='-1'
+  -- CPM: Adding package glfw@3.3.10 (3.3.10)
+  CMake Warning (dev) at C:/Program Files/CMake/share/cmake-4.1/Modules/FetchContent.cmake:1953 (message):
+    Calling FetchContent_Populate(glfw) is deprecated, call
+    FetchContent_MakeAvailable(glfw) instead.  Policy CMP0169 can be set to OLD
+    to allow FetchContent_Populate(glfw) to be called directly for now, but the
+    ability to call it with declared details will be removed completely in a
+    future version.
+  Call Stack (most recent call first):
+    build/cmake/CPM_0.38.7.cmake:1010 (FetchContent_Populate)
+    build/cmake/CPM_0.38.7.cmake:804 (cpm_fetch_package)
+    cmake/Packages.cmake:3 (CPMAddPackage)
+    CMakeLists.txt:23 (include)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Populating glfw
+  -- Configuring done (0.4s)
+  -- Generating done (0.3s)
+  -- Build files have been written to: C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glfw-subbuild
+  MSBuild version 17.14.8+a7a4d5af0 for .NET Framework
+  
+    Performing update step for 'glfw-populate'
+    -- Already at requested tag: 3.3.10
+    No patch step for 'glfw-populate'
+    No configure step for 'glfw-populate'
+    No build step for 'glfw-populate'
+    No install step for 'glfw-populate'
+    No test step for 'glfw-populate'
+    Completed 'glfw-populate'
+  -- Using Win32 for window creation
+  -- CPM: Adding package glad@2.0.6 (v2.0.6)
+  CMake Warning (dev) at C:/Program Files/CMake/share/cmake-4.1/Modules/FetchContent.cmake:1953 (message):
+    Calling FetchContent_Populate(glad) is deprecated, call
+    FetchContent_MakeAvailable(glad) instead.  Policy CMP0169 can be set to OLD
+    to allow FetchContent_Populate(glad) to be called directly for now, but the
+    ability to call it with declared details will be removed completely in a
+    future version.
+  Call Stack (most recent call first):
+    build/cmake/CPM_0.38.7.cmake:1010 (FetchContent_Populate)
+    build/cmake/CPM_0.38.7.cmake:804 (cpm_fetch_package)
+    cmake/Packages.cmake:16 (CPMAddPackage)
+    CMakeLists.txt:23 (include)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Populating glad
+  -- Configuring done (0.2s)
+  -- Generating done (0.3s)
+  -- Build files have been written to: C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild
+  MSBuild version 17.14.8+a7a4d5af0 for .NET Framework
+  
+    Performing update step for 'glad-populate'
+    -- Already at requested tag: v2.0.6
+    No patch step for 'glad-populate'
+    No configure step for 'glad-populate'
+    No build step for 'glad-populate'
+    No install step for 'glad-populate'
+    No test step for 'glad-populate'
+    Completed 'glad-populate'
+  -- Glad Library 'glad_gl_core_46'
+  -- CPM: Adding package glm@1.0.1 (1.0.1)
+  CMake Warning (dev) at C:/Program Files/CMake/share/cmake-4.1/Modules/FetchContent.cmake:1953 (message):
+    Calling FetchContent_Populate(glm) is deprecated, call
+    FetchContent_MakeAvailable(glm) instead.  Policy CMP0169 can be set to OLD
+    to allow FetchContent_Populate(glm) to be called directly for now, but the
+    ability to call it with declared details will be removed completely in a
+    future version.
+  Call Stack (most recent call first):
+    build/cmake/CPM_0.38.7.cmake:1010 (FetchContent_Populate)
+    build/cmake/CPM_0.38.7.cmake:804 (cpm_fetch_package)
+    cmake/Packages.cmake:37 (CPMAddPackage)
+    CMakeLists.txt:23 (include)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Populating glm
+  -- Configuring done (0.2s)
+  -- Generating done (0.3s)
+  -- Build files have been written to: C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild
+  MSBuild version 17.14.8+a7a4d5af0 for .NET Framework
+  
+    Performing update step for 'glm-populate'
+    -- Already at requested tag: 1.0.1
+    No patch step for 'glm-populate'
+    No configure step for 'glm-populate'
+    No build step for 'glm-populate'
+    No install step for 'glm-populate'
+    No test step for 'glm-populate'
+    Completed 'glm-populate'
+  CMake Deprecation Warning at build/_deps/glm-src/CMakeLists.txt:1 (cmake_minimum_required):
+    Compatibility with CMake < 3.10 will be removed from a future version of
+    CMake.
+  
+    Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    to tell CMake that the project requires at least <min> but has been updated
+    to work with policies introduced by <max> or earlier.
+  
+  
+  CMake Deprecation Warning at build/_deps/glm-src/CMakeLists.txt:2 (cmake_policy):
+    Compatibility with CMake < 3.10 will be removed from a future version of
+    CMake.
+  
+    Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    to tell CMake that the project requires at least <min> but has been updated
+    to work with policies introduced by <max> or earlier.
+  
+  
+  -- GLM: Version 1.0.1
+  -- GLM: Build with C++ features auto detection
+  -- CPM: Adding package GroupSourcesByFolder.cmake@1.0 (v1.0)
+  CMake Warning (dev) at C:/Program Files/CMake/share/cmake-4.1/Modules/FetchContent.cmake:1953 (message):
+    Calling FetchContent_Populate(GroupSourcesByFolder.cmake) is deprecated,
+    call FetchContent_MakeAvailable(GroupSourcesByFolder.cmake) instead.
+    Policy CMP0169 can be set to OLD to allow
+    FetchContent_Populate(GroupSourcesByFolder.cmake) to be called directly for
+    now, but the ability to call it with declared details will be removed
+    completely in a future version.
+  Call Stack (most recent call first):
+    build/cmake/CPM_0.38.7.cmake:1010 (FetchContent_Populate)
+    build/cmake/CPM_0.38.7.cmake:804 (cpm_fetch_package)
+    cmake/Packages.cmake:48 (CPMAddPackage)
+    CMakeLists.txt:23 (include)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Populating groupsourcesbyfolder.cmake
+  -- Configuring done (0.2s)
+  -- Generating done (0.3s)
+  -- Build files have been written to: C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild
+  MSBuild version 17.14.8+a7a4d5af0 for .NET Framework
+  
+    Performing update step for 'groupsourcesbyfolder.cmake-populate'
+    -- Already at requested tag: v1.0
+    No patch step for 'groupsourcesbyfolder.cmake-populate'
+    No configure step for 'groupsourcesbyfolder.cmake-populate'
+    No build step for 'groupsourcesbyfolder.cmake-populate'
+    No install step for 'groupsourcesbyfolder.cmake-populate'
+    No test step for 'groupsourcesbyfolder.cmake-populate'
+    Completed 'groupsourcesbyfolder.cmake-populate'
+  -- Configuring done (12.3s)
+  -- Generating done (2.5s)
+  -- Build files have been written to: C:/Users/nawatpim/Downloads/opengl-starter/build

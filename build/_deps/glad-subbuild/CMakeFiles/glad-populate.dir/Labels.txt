@@ -1,0 +1,14 @@
+# Target labels
+ glad-populate
+# Source files and their labels
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/glad-populate
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/6b940da088fdbdc227ab5107fdd496a5/glad-populate.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/775ae7c66c30889dc8ba9668bcb9a054/glad-populate-complete.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-build.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-configure.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-download.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-install.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-mkdir.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-patch.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-test.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glad-subbuild/CMakeFiles/eecc9ca3cbd2f7b313318a1544613802/glad-populate-update.rule

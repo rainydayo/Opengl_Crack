@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\e724ad3b40062b83eeba8a183d43d5fb\glm-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\5039f1e1c0cb707942848149e58ab9b2\glm-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\866a5a13ad6684fab28258c551c4eac3\glm-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glm-subbuild\CMakeFiles\glm-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CC6DC574-8522-30FC-99CE-E623BF7F1500}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

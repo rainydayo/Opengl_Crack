@@ -1,0 +1,14 @@
+# Target labels
+ groupsourcesbyfolder.cmake-populate
+# Source files and their labels
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/groupsourcesbyfolder.cmake-populate
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/4aa6bf0d5751685162df4b99844a231e/groupsourcesbyfolder.cmake-populate.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/c75ef23138c52316e1cec466091f984d/groupsourcesbyfolder.cmake-populate-complete.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-build.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-configure.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-download.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-install.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-mkdir.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-patch.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-test.rule
+C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/groupsourcesbyfolder.cmake-subbuild/CMakeFiles/2419e710fd2050b8911fd3cdc68a2bad/groupsourcesbyfolder.cmake-populate-update.rule

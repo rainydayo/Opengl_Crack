@@ -1,0 +1,10 @@
+^C:\USERS\NAWATPIM\DOWNLOADS\OPENGL-STARTER\BUILD\_DEPS\GLM-SUBBUILD\CMAKEFILES\866A5A13AD6684FAB28258C551C4EAC3\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild -BC:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/glm-populate.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

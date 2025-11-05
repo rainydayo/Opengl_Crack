@@ -9,7 +9,7 @@ file(COPY ${ASSETS_DIR} DESTINATION ${CMAKE_BINARY_DIR})
 #-----------------------------------------------------------------------------#
 # list of all source files
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "${SRC_DIR}/*.h")
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "${SRC_DIR}/*.h" "${SRC_DIR}/*.hpp")
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SRC_DIR}/*.cpp")
 file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/shaders/*.glsl")
 

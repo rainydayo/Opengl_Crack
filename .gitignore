@@ -31,8 +31,6 @@
 *.out
 *.app
 
-# Build folder
-build/
 
 # Install folder
 install
@@ -43,3 +41,6 @@ install
 # CLion
 .idea
 cmake-*
+
+# remove biult folder
+**/bin/

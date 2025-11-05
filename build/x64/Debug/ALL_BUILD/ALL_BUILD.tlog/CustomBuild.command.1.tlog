@@ -1,0 +1,10 @@
+^C:\USERS\NAWATPIM\DOWNLOADS\OPENGL-STARTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nawatpim/Downloads/opengl-starter -BC:/Users/nawatpim/Downloads/opengl-starter/build --check-stamp-file C:/Users/nawatpim/Downloads/opengl-starter/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

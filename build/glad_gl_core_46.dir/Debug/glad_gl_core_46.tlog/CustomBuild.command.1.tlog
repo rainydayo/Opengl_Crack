@@ -1,0 +1,36 @@
+^C:\USERS\NAWATPIM\DOWNLOADS\OPENGL-STARTER\BUILD\CMAKEFILES\AAFC7947491C04C65F0B23D1FB70933F\KHRPLATFORM.H.RULE
+setlocal
+cd C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\glad-src
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+echo Cleaning C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E remove_directory C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46
+if %errorlevel% neq 0 goto :cmEnd
+echo Generating with args --out-path C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46 --api gl:core=4.6 c
+if %errorlevel% neq 0 goto :cmEnd
+C:\Users\nawatpim\AppData\Local\Programs\Python\Python313\python.exe -m glad --out-path C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46 --api gl:core=4.6 c
+if %errorlevel% neq 0 goto :cmEnd
+echo Writing C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46/args.txt
+if %errorlevel% neq 0 goto :cmEnd
+echo --out-path C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46 --api gl:core=4.6 c > C:/Users/nawatpim/Downloads/opengl-starter/build/gladsources/glad_gl_core_46/args.txt
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\NAWATPIM\DOWNLOADS\OPENGL-STARTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nawatpim/Downloads/opengl-starter -BC:/Users/nawatpim/Downloads/opengl-starter/build --check-stamp-file C:/Users/nawatpim/Downloads/opengl-starter/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

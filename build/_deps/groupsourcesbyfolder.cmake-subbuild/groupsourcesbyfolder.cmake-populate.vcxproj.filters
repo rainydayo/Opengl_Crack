@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\2419e710fd2050b8911fd3cdc68a2bad\groupsourcesbyfolder.cmake-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\c75ef23138c52316e1cec466091f984d\groupsourcesbyfolder.cmake-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\4aa6bf0d5751685162df4b99844a231e\groupsourcesbyfolder.cmake-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\nawatpim\Downloads\opengl-starter\build\_deps\groupsourcesbyfolder.cmake-subbuild\CMakeFiles\groupsourcesbyfolder.cmake-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{21CFBA7F-DD68-3950-9F5C-95706C0836BD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

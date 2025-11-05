@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/glm-populate"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/866a5a13ad6684fab28258c551c4eac3/glm-populate.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/5039f1e1c0cb707942848149e58ab9b2/glm-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/nawatpim/Downloads/opengl-starter/build/_deps/glm-subbuild/CMakeFiles/e724ad3b40062b83eeba8a183d43d5fb/glm-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"glm-populate"
+		],
+		"name" : "glm-populate"
+	}
+}

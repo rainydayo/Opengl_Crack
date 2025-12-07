@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
@@ -30,14 +31,18 @@ double lastX = 0.0, lastY = 0.0;
 static const int MAX_CRACKS = 16;
 
 int       gCrackCount = 0;
-glm::vec2 gCrackUV[MAX_CRACKS]; // center UV (debug)
-int       gCrackFace[MAX_CRACKS]; // face id 0..5
-float     gCrackRadius[MAX_CRACKS];// radius (local/world)
-float     gCrackSeed[MAX_CRACKS]; // seed
+glm::vec2 gCrackUV[MAX_CRACKS];
+int       gCrackFace[MAX_CRACKS];
+float     gCrackRadius[MAX_CRACKS];
+float     gCrackSeed[MAX_CRACKS];
 
 glm::vec3 gCrackCenter[MAX_CRACKS];
 glm::vec3 gCrackU[MAX_CRACKS];
 glm::vec3 gCrackV[MAX_CRACKS];
+
+// ========== Timer ==========
+bool gCrackTimingPending = false;
+std::chrono::high_resolution_clock::time_point gCrackStartTime;
 
 // ========== Utils ==========
 static void die(const char* msg) {
@@ -82,7 +87,7 @@ static GLuint makeProg(const char* vs, const char* fs) {
     return p;
 }
 
-// Ray–AABB intersection for cube at [-1,1]^3 in world space
+// Ray–AABB intersection
 bool intersectRayAABB(const glm::vec3& orig,
     const glm::vec3& dir,
     const glm::vec3& bmin,
@@ -115,7 +120,7 @@ bool intersectRayAABB(const glm::vec3& orig,
     return true;
 }
 
-// ========== Input handling ==========
+// ========== Input ==========
 void processInput(GLFWwindow* w) {
     float sp = 2.5f * deltaTime;
     if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS) camPos += sp * camFront;
@@ -131,7 +136,6 @@ void processInput(GLFWwindow* w) {
         glfwSetWindowShouldClose(w, GLFW_TRUE);
 }
 
-// Rotate camera only while right mouse button is pressed
 void cursorPosCallback(GLFWwindow* window, double x, double y) {
     static const float S = 0.1f;
 
@@ -170,7 +174,7 @@ void scrollCallback(GLFWwindow*, double, double yoff) {
     if (fov > 90.f) fov = 90.f;
 }
 
-// Left click: shoot ray, find hit point on cube, append a crack
+// Left click -> add crack
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*/) {
     if (button != GLFW_MOUSE_BUTTON_LEFT || action != GLFW_PRESS)
         return;
@@ -186,7 +190,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
     glm::mat4 P = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.f);
     glm::mat4 viewM = glm::lookAt(camPos, camPos + camFront, camUp);
 
-    // pixel -> NDC
     float x = static_cast<float>(mouseX);
     float y = static_cast<float>(mouseY);
     float ndcX = 2.0f * x / (float)winW - 1.0f;
@@ -280,6 +283,9 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
         gCrackV[i] = tanV;
     }
 
+    gCrackTimingPending = true;
+    gCrackStartTime = std::chrono::high_resolution_clock::now();
+
     std::printf(
         "Click hit cube: worldPos=(%.3f, %.3f, %.3f), face=%d, uv=(%.3f, %.3f), totalCracks=%d\n",
         p.x, p.y, p.z, faceId, uv.x, uv.y, gCrackCount
@@ -363,7 +369,8 @@ float fbm(vec2 p){
     return s;
 }
 
-vec2 worleyF(vec2 p){
+// Worley base (Euclidean / Chebyshev mix)
+vec2 worleyF_metric(vec2 p, float k){
     vec2 ip=floor(p), fp=fract(p);
     float F1=1e9, F2=1e9;
     for(int j=-1;j<=1;j++){
@@ -371,7 +378,11 @@ vec2 worleyF(vec2 p){
             vec2 cell = ip + vec2(i,j);
             vec2 r2   = rand2_2(cell) - 0.5;
             vec2 d    = (vec2(i,j) + r2) - fp;
-            float dist = dot(d,d);
+
+            float de = dot(d,d);
+            float dm = max(abs(d.x), abs(d.y));
+            float dist = mix(de, dm*dm, k);
+
             if(dist < F1){ F2=F1; F1=dist; }
             else if(dist < F2){ F2=dist; }
         }
@@ -389,7 +400,6 @@ uniform vec2  uStressDir;
 uniform float uAniso;
 uniform float uTime;
 
-// multi-crack data
 #define MAX_CRACKS 16
 uniform int   uCrackCount;
 uniform vec2  uCrackUV    [MAX_CRACKS];
@@ -423,7 +433,6 @@ void main(){
         float radius = uCrackRadius[i];
         float seed   = uCrackSeed[i];
 
-        // local tangent plane coords
         vec3 d3 = vPos - center;
         vec2 local = vec2(dot(d3, uCrackU[i]),
                           dot(d3, uCrackV[i]));
@@ -431,17 +440,31 @@ void main(){
         if (r < 1e-6) r = 1e-6;
 
         float baseRadius = max(radius, 1e-4);
+        float rNormBase = clamp(r / baseRadius, 0.0, 1.0);
 
-        // ====== domain / seed density แบบเน้น center (ไม่มี angle-based radial distortion) ======
-        float rNorm = clamp(r / baseRadius, 0.0, 1.0);
-        float densityScale = mix(2.0, 0.6, rNorm);
+        // ===== บีบทิศ tangential ด้านนอก =====
+        vec2 localAniso = local;
+        {
+            vec2 nRad = local / r;
+            vec2 nTan = vec2(-nRad.y, nRad.x);
+            float rComp = dot(local, nRad);
+            float tComp = dot(local, nTan);
 
-        vec2 coord = local * (uScale * densityScale)
+            float tCompress = mix(1.0,
+                                  0.35,
+                                  smoothstep(0.6, 1.0, rNormBase));
+            localAniso = nRad * rComp + nTan * (tComp * tCompress);
+        }
+
+        float densityScale = mix(2.0, 0.6, rNormBase);
+
+        vec2 coord = localAniso * (uScale * densityScale)
                    + vec2(seed * 0.73, seed * 1.41);
-        // =======================================================================
 
         vec2 p = stressWarp(coord, seed);
-        vec2 F = worleyF(p);
+
+        float metricK = smoothstep(0.5, 1.0, rNormBase);
+        vec2 F = worleyF_metric(p, metricK);
         float edge = F.y - F.x;
 
         float w = uCrackWidth;
@@ -449,27 +472,35 @@ void main(){
         float micro = 1.0 - smoothstep(0.0, w*0.5, abs(edge-0.02));
         float crackBase = clamp(crack + 0.5*micro, 0.0, 1.0);
 
-        // ====== radial mask กลับไปแบบเวอร์ชันเดิม (วงกลม + hardFalloff + centerBoost) ======
-        float innerR = 0.0;
-        float outerR = baseRadius;
+        // ===== radius: minR = 0.5 * baseRadius + random extra (0..0.5*baseRadius) =====
+        float angDir = atan(local.y, local.x);                // -pi..pi
+        float ang01  = (angDir + 3.14159265) / 6.2831853;     // 0..1
+        float sector = floor(ang01 * 48.0);                   // 48 sectors รอบวง
+        float dirNoise = rand2(vec2(sector + seed*7.31, seed*3.17));
+        dirNoise = clamp(dirNoise, 0.0, 1.0);
 
+        float minR     = baseRadius * 0.5;    // 1) ขั้นต่ำ 1/2
+        float maxExtra = baseRadius * 0.5;    // 2) งอกได้อีกสูงสุด 1/2
+        float outerR   = minR + maxExtra * dirNoise;
+
+        float innerR = 0.0;
         float radial      = 1.0 - smoothstep(innerR, outerR, r);
         float hardFalloff = 1.0 - smoothstep(outerR, outerR*1.6, r);
-        // =======================================================================
 
-        // normal mask: จำกัดรอยแตกใกล้ระนาบหน้าที่คลิก (thickness = 0.01)
         vec3 n = normalize(cross(uCrackU[i], uCrackV[i]));
-        float dN = dot(d3, n);          // distance along normal
-        float thickness = 0.01;         // ตามที่ขอ
+        float dN = dot(d3, n);
+        float thickness = 0.01;
         float normalMask = 1.0 - smoothstep(thickness*0.4,
                                             thickness,
                                             abs(dN));
 
         float mask = radial * hardFalloff * normalMask;
 
+        float outerBreak = 1.0 - smoothstep(0.8, 1.0, rNormBase);
+        mask *= outerBreak;
+
         float centerBoost = pow(1.0 - clamp(r / (outerR + 1e-4), 0.0, 1.0), 0.35);
         float crackAmount = crackBase * mask * (0.4 + 0.6 * centerBoost);
-        // =======================================================================
 
         totalCrack = max(totalCrack, crackAmount);
     }
@@ -479,13 +510,13 @@ void main(){
     if (uCrackCount > 0 && totalCrack > 0.0) {
         vec2 localApprox = vUV * uScale;
         vec2 p0 = stressWarp(localApprox, uCrackSeed[0]);
-        vec2 F0 = worleyF(p0);
+        vec2 F0 = worleyF_metric(p0, 0.5);
         float edge0 = F0.y - F0.x;
 
         float e = 0.002;
         vec2 px = vec2(e,0), py=vec2(0,e);
-        vec2 Fx = worleyF(p0+px);
-        vec2 Fy = worleyF(p0+py);
+        vec2 Fx = worleyF_metric(p0+px, 0.5);
+        vec2 Fy = worleyF_metric(p0+py, 0.5);
         float ex = (Fx.y-Fx.x) - edge0;
         float ey = (Fy.y-Fy.x) - edge0;
 
@@ -509,7 +540,7 @@ int main() {
 
     GLFWwindow* win = glfwCreateWindow(
         1280, 720,
-        "Procedural Cracks on Cube (radial reverted, thin slab)",
+        "Procedural Cracks on Cube (random outer radius)",
         nullptr, nullptr
     );
     if (!win) return -1;
@@ -550,7 +581,7 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     float scale = 10.0f;
-    float jitter = 0.30f;
+    float jitter = 0.70f;
     float crackWidth = 0.040f;
     glm::vec2 stressDir = glm::normalize(glm::vec2(1.0f, 0.3f));
     float aniso = 0.6f;
@@ -598,6 +629,14 @@ int main() {
 
         glBindVertexArray(cube.vao);
         glDrawElements(GL_TRIANGLES, cube.indexCount, GL_UNSIGNED_INT, 0);
+
+        if (gCrackTimingPending) {
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            double ms = std::chrono::duration<double, std::milli>(end - gCrackStartTime).count();
+            std::printf("Crack render time: %.3f ms (total cracks: %d)\n", ms, gCrackCount);
+            gCrackTimingPending = false;
+        }
 
         glfwSwapBuffers(win);
         glfwPollEvents();

@@ -31,16 +31,11 @@ double lastX = 0.0, lastY = 0.0;
 
 // ========== Crack parameters (configurable) ==========
 struct CrackParams {
-    // ความหนาแน่น seed (ยิ่งสูง ยิ่งแตกละเอียด)
-    float seedDensity;     // maps to uScale
-    // รัศมีพื้นฐานของ crack ต่อครั้งที่คลิก
-    float baseRadius;
-    // ระดับ noise / jitter (0 = ไม่มี noise เลย เส้นตรง)
-    float jitter;
-    // ความกว้างของเส้น crack
-    float crackWidth;
-    // anisotropy (0 = isotropic, 1 = แตกยาวตามทิศ stress)
-    float aniso;
+    float seedDensity;   // ความหนาแน่น seed (uScale)
+    float baseRadius;    // รัศมีพื้นฐานของ crack ต่อคลิก
+    float jitter;        // 0 = ไม่มี noise, >0 = มี noise
+    float crackWidth;    // ความหนาเส้น crack
+    float aniso;         // anisotropy 0..1
 };
 
 CrackParams gCrackParams;
@@ -140,11 +135,11 @@ bool intersectRayAABB(const glm::vec3& orig,
 
 // ===== Crack parameter configuration (console) =====
 void initDefaultCrackParams() {
-    gCrackParams.seedDensity = 10.0f;  // เดิม uScale
-    gCrackParams.baseRadius = 0.75f;  // เดิม gCrackRadius
-    gCrackParams.jitter = 0.70f;  // เดิม jitter (ตั้งเป็น 0 ถ้าอยากไม่มี noise)
-    gCrackParams.crackWidth = 0.040f; // เดิม crackWidth
-    gCrackParams.aniso = 0.60f;  // เดิม aniso
+    gCrackParams.seedDensity = 10.0f;
+    gCrackParams.baseRadius = 0.75f;
+    gCrackParams.jitter = 0.70f;
+    gCrackParams.crackWidth = 0.040f;
+    gCrackParams.aniso = 0.60f;
 }
 
 float readFloatParam(const std::string& label, float defVal,
@@ -309,6 +304,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
     int       faceId;
     glm::vec2 uv;
 
+    // CPU-side calculation of face and UV (this is accurate)
     if (ap.x >= ap.y && ap.x >= ap.z) {
         faceId = (p.x >= 0.0f) ? 0 : 1;
         uv = glm::vec2((p.z + 1.0f) * 0.5f,
@@ -388,32 +384,29 @@ layout(location=0) in vec3 aPos;
 
 out vec3 vPos;
 out vec2 vUV;
-flat out int vFaceId;
+// Removed vFaceId because it is unreliable with shared vertices
 
 uniform mat4 uMVP;
 
 void main() {
     vPos = aPos;
 
+    // UV calculation in Vertex Shader is approximate for shared vertices but we keep it
+    // if other effects need it. The crack effect uses vPos directly.
     vec3 ap = abs(aPos);
-    int   faceId;
     vec2  uv;
 
     if (ap.x >= ap.y && ap.x >= ap.z) {
-        faceId = (aPos.x >= 0.0) ? 0 : 1;
         uv     = vec2((aPos.z + 1.0) * 0.5,
                       (aPos.y + 1.0) * 0.5);
     } else if (ap.y >= ap.x && ap.y >= ap.z) {
-        faceId = (aPos.y >= 0.0) ? 2 : 3;
         uv     = vec2((aPos.x + 1.0) * 0.5,
                       (aPos.z + 1.0) * 0.5);
     } else {
-        faceId = (aPos.z >= 0.0) ? 4 : 5;
         uv     = vec2((aPos.x + 1.0) * 0.5,
                       (aPos.y + 1.0) * 0.5);
     }
 
-    vFaceId = faceId;
     vUV     = uv;
 
     gl_Position = uMVP * vec4(aPos, 1.0);
@@ -424,7 +417,6 @@ static const char* FS = R"(
 #version 450 core
 in vec3 vPos;
 in vec2 vUV;
-flat in int vFaceId;
 
 out vec4 FragColor;
 
@@ -518,25 +510,72 @@ vec2 stressWarp(vec2 coord, float seed){
 }
 
 void main(){
-    vec3 baseColor = vec3(0.72, 0.69, 0.65);
+    vec3 baseColor = vec3(0.72, 0.69, 0.65); // สี cube คงที่
     float totalCrack = 0.0;
+    
+    // FIX: Calculate Geometric Normal directly from vPos (Axis Aligned Cube)
+    // This avoids artifacts from shared vertices where interpolation or per-vertex logic fails.
+    vec3 ap = abs(vPos);
+    vec3 fragN;
+    if (ap.x >= ap.y && ap.x >= ap.z) {
+        fragN = vec3(sign(vPos.x), 0.0, 0.0);
+    } else if (ap.y >= ap.x && ap.y >= ap.z) {
+        fragN = vec3(0.0, sign(vPos.y), 0.0);
+    } else {
+        fragN = vec3(0.0, 0.0, sign(vPos.z));
+    }
 
     for (int i = 0; i < uCrackCount; ++i) {
         vec3 center = uCrackCenter[i];
         float radius = uCrackRadius[i];
         float seed   = uCrackSeed[i];
-
+        
+        // Basic difference vector in 3D
         vec3 d3 = vPos - center;
+        
+        // Determine the crack's basis normal (perpendicular to its U and V)
+        vec3 crackN = normalize(cross(uCrackU[i], uCrackV[i]));
+
+        // === Prevent Shoot-Through to Opposite Face ===
+        // If the current face normal is "opposite" to the crack normal (dot < -0.1),
+        // it means we are on the back side of the object relative to where the crack started.
+        // We mask it out completely to prevent artifacts.
+        // - Same face: dot ~ 1.0
+        // - Neighbor face: dot ~ 0.0
+        // - Opposite face: dot ~ -1.0
+        if (dot(crackN, fragN) < -0.1) {
+            continue;
+        }
+
+        // Calculate planar coordinates on the crack's face
         vec2 local = vec2(dot(d3, uCrackU[i]),
                           dot(d3, uCrackV[i]));
+                          
+        // === Geodesic Unfolding for Cube ===
+        // We calculate 'depth' distance from the crack plane.
+        // For a neighbor face, this depth is the distance traveled 'around the corner'.
+        float depth = dot(d3, crackN);
+
+        // If significant depth (neighbor face), we unfold the coordinate system
+        if (abs(depth) > 0.0001) {
+             // Find which axis of the crack's coordinate system (U or V) aligns with the current fragment normal.
+             float matchU = dot(uCrackU[i], fragN);
+             float matchV = dot(uCrackV[i], fragN);
+             
+             // 'depth' is typically negative (neighbor is behind the plane).
+             // We subtract (match * depth) to extend the coordinate outwards along the surface.
+             local.x -= matchU * depth;
+             local.y -= matchV * depth;
+        }
+        
         float r = length(local);
         if (r < 1e-6) r = 1e-6;
 
         float baseRadius = max(radius, 1e-4);
         float rNormBase = clamp(r / baseRadius, 0.0, 1.0);
 
-        // basis normal
-        vec3 n = normalize(cross(uCrackU[i], uCrackV[i]));
+        // basis normal (re-used)
+        vec3 n = crackN;
 
         // ===== anisotropic domain (radial / tangential) =====
         vec2 localAniso = local;
@@ -563,11 +602,11 @@ void main(){
         float edge = F.y - F.x;
 
         float w = uCrackWidth;
-        float crack = 1.0 - smoothstep(0.0, w, edge);
-        float micro = 1.0 - smoothstep(0.0, w*0.5, abs(edge-0.02));
+        float crack  = 1.0 - smoothstep(0.0, w, edge);
+        float micro  = 1.0 - smoothstep(0.0, w*0.5, abs(edge-0.02));
         float crackBase = clamp(crack + 0.5*micro, 0.0, 1.0);
 
-        // ===== radius: minR = 0.5 * baseRadius + random extra (0..0.5*baseRadius) =====
+        // ===== radius: minR = 0.25 * baseRadius + random extra (0..0.75*baseRadius) =====
         float angDir = atan(local.y, local.x);
         float ang01  = (angDir + 3.14159265) / 6.2831853;
         float sector = floor(ang01 * 48.0);
@@ -578,47 +617,21 @@ void main(){
         float maxExtra = baseRadius * 0.75;
         float outerR   = minR + maxExtra * dirNoise;
 
-        float innerR = 0.0;
-        float radial      = 1.0 - smoothstep(innerR, outerR, r);
-        float hardFalloff = 1.0 - smoothstep(outerR, outerR*1.6, r);
+        // ===== solid radial mask: ติดเต็มจน outerR แล้วตัดหาย =====
+        // Note: We removed the planar 'normalMask' clipping here to allow cracks to wrap
+        float radialMask = 1.0 - smoothstep(outerR, outerR + 0.001, r);
 
-        float dN = dot(d3, n);
-        float thickness = 0.01;
-        float normalMask = 1.0 - smoothstep(thickness*0.4,
-                                            thickness,
-                                            abs(dN));
+        float mask = radialMask;
 
-        float mask = radial * hardFalloff * normalMask;
-
-        float outerBreak = 1.0 - smoothstep(0.8, 1.0, rNormBase);
-        mask *= outerBreak;
-
-        float centerBoost = pow(1.0 - clamp(r / (outerR + 1e-4), 0.0, 1.0), 0.35);
-        float crackAmount = crackBase * mask * (0.4 + 0.6 * centerBoost);
+        float crackAmount = crackBase * mask;
 
         totalCrack = max(totalCrack, crackAmount);
     }
 
-    vec3 c = mix(baseColor, vec3(0.05), totalCrack);
-
-    if (uCrackCount > 0 && totalCrack > 0.0) {
-        vec2 localApprox = vUV * uScale;
-        vec2 p0 = stressWarp(localApprox, uCrackSeed[0]);
-        vec2 F0 = worleyF_metric(p0, 0.5);
-        float edge0 = F0.y - F0.x;
-
-        float e = 0.002;
-        vec2 px = vec2(e,0), py=vec2(0,e);
-        vec2 Fx = worleyF_metric(p0+px, 0.5);
-        vec2 Fy = worleyF_metric(p0+py, 0.5);
-        float ex = (Fx.y-Fx.x) - edge0;
-        float ey = (Fy.y-Fy.x) - edge0;
-
-        vec3 L = normalize(vec3(0.5, 0.8, 0.6));
-        vec3 N = normalize(vec3(-ex, -ey, 1.0));
-        float diff = max(dot(N, L), 0.0);
-        c *= (0.35 + 0.65*diff);
-    }
+    // ===== base color คงที่, crack = ดำสนิท =====
+    float crackMask = clamp(totalCrack, 0.0, 1.0);
+    vec3 crackColor = vec3(0.0);
+    vec3 c = mix(baseColor, crackColor, crackMask);
 
     FragColor = vec4(c, 1.0);
 }
@@ -626,7 +639,6 @@ void main(){
 
 // ========== main() ==========
 int main() {
-    // ตั้งค่า default แล้วเปิดให้ปรับก่อนเริ่ม OpenGL
     initDefaultCrackParams();
     configureCrackParamsFromInput();
 
@@ -638,7 +650,7 @@ int main() {
 
     GLFWwindow* win = glfwCreateWindow(
         1280, 720,
-        "Procedural Cracks on Cube (configurable, no parallax param)",
+        "Procedural Cracks on Cube (Fix: No Shoot-Through + Geodesic Wrap)",
         nullptr, nullptr
     );
     if (!win) return -1;

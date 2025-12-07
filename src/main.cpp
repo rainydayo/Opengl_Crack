@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+#include <iostream>
+#include <string>
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
@@ -26,6 +28,22 @@ float lastFrame = 0.f;
 
 bool  firstMouse = true;
 double lastX = 0.0, lastY = 0.0;
+
+// ========== Crack parameters (configurable) ==========
+struct CrackParams {
+    // ความหนาแน่น seed (ยิ่งสูง ยิ่งแตกละเอียด)
+    float seedDensity;     // maps to uScale
+    // รัศมีพื้นฐานของ crack ต่อครั้งที่คลิก
+    float baseRadius;
+    // ระดับ noise / jitter (0 = ไม่มี noise เลย เส้นตรง)
+    float jitter;
+    // ความกว้างของเส้น crack
+    float crackWidth;
+    // anisotropy (0 = isotropic, 1 = แตกยาวตามทิศ stress)
+    float aniso;
+};
+
+CrackParams gCrackParams;
 
 // ========== Multi-crack state ==========
 static const int MAX_CRACKS = 16;
@@ -118,6 +136,76 @@ bool intersectRayAABB(const glm::vec3& orig,
 
     tHit = tmin;
     return true;
+}
+
+// ===== Crack parameter configuration (console) =====
+void initDefaultCrackParams() {
+    gCrackParams.seedDensity = 10.0f;  // เดิม uScale
+    gCrackParams.baseRadius = 0.75f;  // เดิม gCrackRadius
+    gCrackParams.jitter = 0.70f;  // เดิม jitter (ตั้งเป็น 0 ถ้าอยากไม่มี noise)
+    gCrackParams.crackWidth = 0.040f; // เดิม crackWidth
+    gCrackParams.aniso = 0.60f;  // เดิม aniso
+}
+
+float readFloatParam(const std::string& label, float defVal,
+    const std::string& hint = std::string())
+{
+    std::cout << label << " [" << defVal << "]";
+    if (!hint.empty()) std::cout << "  " << hint;
+    std::cout << " : ";
+
+    std::string line;
+    if (!std::getline(std::cin, line)) {
+        std::cout << "\n";
+        return defVal;
+    }
+    if (line.empty()) {
+        return defVal;
+    }
+    try {
+        float v = std::stof(line);
+        return v;
+    }
+    catch (...) {
+        std::cout << "  -> invalid, keep " << defVal << "\n";
+        return defVal;
+    }
+}
+
+void configureCrackParamsFromInput() {
+    std::cout << "=== Crack configuration ===\n";
+    std::cout << "(กด Enter เพื่อใช้ค่า default ในวงเล็บ)\n";
+    std::cout << "ตัวอย่าง: แก้ว = seedDensity สูง, crackWidth เล็ก, jitter สูง\n";
+    std::cout << "          คอนกรีต = seedDensity กลาง, crackWidth หนาขึ้น, jitter กลาง\n";
+    std::cout << "          ไม่มี noise เลย = jitter = 0\n\n";
+
+    gCrackParams.seedDensity = readFloatParam(
+        "Seed density (uScale)",
+        gCrackParams.seedDensity,
+        "// สูง = แตกละเอียด"
+    );
+    gCrackParams.baseRadius = readFloatParam(
+        "Base radius per click",
+        gCrackParams.baseRadius,
+        "// ใหญ่ = รัศมีกระจายไกล"
+    );
+    gCrackParams.jitter = readFloatParam(
+        "Noise / jitter",
+        gCrackParams.jitter,
+        "// 0 = เส้นตรง ไม่มี noise, สูง = คดเคี้ยว"
+    );
+    gCrackParams.crackWidth = readFloatParam(
+        "Crack width",
+        gCrackParams.crackWidth,
+        "// สูง = เส้นหนา"
+    );
+    gCrackParams.aniso = readFloatParam(
+        "Anisotropy (0..1)",
+        gCrackParams.aniso,
+        "// สูง = แตกยืดยาวตามทิศ stress"
+    );
+
+    std::cout << "\nใช้ค่าที่ตั้งไว้ด้านบนในการจำลองรอยแตก\n\n";
 }
 
 // ========== Input ==========
@@ -259,7 +347,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
         int i = gCrackCount++;
         gCrackUV[i] = uv;
         gCrackFace[i] = faceId;
-        gCrackRadius[i] = 0.75f;
+        gCrackRadius[i] = gCrackParams.baseRadius;
         float t = float(glfwGetTime());
         gCrackSeed[i] = t * 3.17f + float(i) * 11.31f;
 
@@ -274,7 +362,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
 
         gCrackUV[i] = uv;
         gCrackFace[i] = faceId;
-        gCrackRadius[i] = 0.75f;
+        gCrackRadius[i] = gCrackParams.baseRadius;
         float t = float(glfwGetTime());
         gCrackSeed[i] = t * 3.17f + float(i) * 11.31f;
 
@@ -394,7 +482,7 @@ mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }
 
 // global controls
 uniform float uScale;
-uniform float uJitter;
+uniform float uJitter;      // 0 = ไม่มี noise, >0 = มี noise
 uniform float uCrackWidth;
 uniform vec2  uStressDir;
 uniform float uAniso;
@@ -412,6 +500,7 @@ uniform vec3  uCrackU     [MAX_CRACKS];
 uniform vec3  uCrackV     [MAX_CRACKS];
 
 vec2 stressWarp(vec2 coord, float seed){
+    // anisotropic stretch along stress direction (linear transform)
     float ang = atan(uStressDir.y, uStressDir.x);
     mat2 R    = rot(ang);
     mat2 Rinv = rot(-ang);
@@ -420,8 +509,12 @@ vec2 stressWarp(vec2 coord, float seed){
     q.y   *= (1.0 - 0.6*uAniso);
     q     = Rinv * q;
 
-    float j = uJitter * (fbm(coord*1.3 + 7.7 + seed) - 0.5);
-    return q + j;
+    // high-frequency noise (ปิดได้ด้วย uJitter = 0)
+    if (uJitter > 0.0) {
+        float j = uJitter * (fbm(coord*1.3 + 7.7 + seed) - 0.5);
+        q += vec2(j, j);
+    }
+    return q;
 }
 
 void main(){
@@ -442,7 +535,10 @@ void main(){
         float baseRadius = max(radius, 1e-4);
         float rNormBase = clamp(r / baseRadius, 0.0, 1.0);
 
-        // ===== บีบทิศ tangential ด้านนอก =====
+        // basis normal
+        vec3 n = normalize(cross(uCrackU[i], uCrackV[i]));
+
+        // ===== anisotropic domain (radial / tangential) =====
         vec2 localAniso = local;
         {
             vec2 nRad = local / r;
@@ -457,7 +553,6 @@ void main(){
         }
 
         float densityScale = mix(2.0, 0.6, rNormBase);
-
         vec2 coord = localAniso * (uScale * densityScale)
                    + vec2(seed * 0.73, seed * 1.41);
 
@@ -473,21 +568,20 @@ void main(){
         float crackBase = clamp(crack + 0.5*micro, 0.0, 1.0);
 
         // ===== radius: minR = 0.5 * baseRadius + random extra (0..0.5*baseRadius) =====
-        float angDir = atan(local.y, local.x);                // -pi..pi
-        float ang01  = (angDir + 3.14159265) / 6.2831853;     // 0..1
-        float sector = floor(ang01 * 48.0);                   // 48 sectors รอบวง
+        float angDir = atan(local.y, local.x);
+        float ang01  = (angDir + 3.14159265) / 6.2831853;
+        float sector = floor(ang01 * 48.0);
         float dirNoise = rand2(vec2(sector + seed*7.31, seed*3.17));
         dirNoise = clamp(dirNoise, 0.0, 1.0);
 
-        float minR     = baseRadius * 0.5;    // 1) ขั้นต่ำ 1/2
-        float maxExtra = baseRadius * 0.5;    // 2) งอกได้อีกสูงสุด 1/2
+        float minR     = baseRadius * 0.25;
+        float maxExtra = baseRadius * 0.75;
         float outerR   = minR + maxExtra * dirNoise;
 
         float innerR = 0.0;
         float radial      = 1.0 - smoothstep(innerR, outerR, r);
         float hardFalloff = 1.0 - smoothstep(outerR, outerR*1.6, r);
 
-        vec3 n = normalize(cross(uCrackU[i], uCrackV[i]));
         float dN = dot(d3, n);
         float thickness = 0.01;
         float normalMask = 1.0 - smoothstep(thickness*0.4,
@@ -532,6 +626,10 @@ void main(){
 
 // ========== main() ==========
 int main() {
+    // ตั้งค่า default แล้วเปิดให้ปรับก่อนเริ่ม OpenGL
+    initDefaultCrackParams();
+    configureCrackParamsFromInput();
+
     if (!glfwInit()) return -1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -540,7 +638,7 @@ int main() {
 
     GLFWwindow* win = glfwCreateWindow(
         1280, 720,
-        "Procedural Cracks on Cube (random outer radius)",
+        "Procedural Cracks on Cube (configurable, no parallax param)",
         nullptr, nullptr
     );
     if (!win) return -1;
@@ -580,11 +678,7 @@ int main() {
     Mesh cube = makeColoredCube();
     glEnable(GL_DEPTH_TEST);
 
-    float scale = 10.0f;
-    float jitter = 0.70f;
-    float crackWidth = 0.040f;
     glm::vec2 stressDir = glm::normalize(glm::vec2(1.0f, 0.3f));
-    float aniso = 0.6f;
 
     while (!glfwWindowShouldClose(win)) {
         float now = float(glfwGetTime());
@@ -608,11 +702,11 @@ int main() {
         glUseProgram(prog);
         glUniformMatrix4fv(uMVP, 1, GL_FALSE, &MVP[0][0]);
 
-        glUniform1f(uScale, scale);
-        glUniform1f(uJitter, jitter);
-        glUniform1f(uCrackWidth, crackWidth);
+        glUniform1f(uScale, gCrackParams.seedDensity);
+        glUniform1f(uJitter, gCrackParams.jitter);
+        glUniform1f(uCrackWidth, gCrackParams.crackWidth);
         glUniform2f(uStressDir, stressDir.x, stressDir.y);
-        glUniform1f(uAniso, aniso);
+        glUniform1f(uAniso, gCrackParams.aniso);
         glUniform1f(uTime, now);
 
         glUniform1i(uCrackCountLoc, gCrackCount);

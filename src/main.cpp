@@ -154,9 +154,9 @@ void initDefaultCrackParams() {
     gCrackParams.seedDensity = 10.0f;
     gCrackParams.baseRadius = 0.75f;
     gCrackParams.jitter = 0.50f;
-    gCrackParams.crackWidth = 0.045f;
+    gCrackParams.crackWidth = 0.10f;
     gCrackParams.aniso = 0.60f;
-    gCrackParams.heightScale = 0.05f; // POM Depth
+    gCrackParams.heightScale = 0.20f;
 }
 
 float readFloatParam(const std::string& label, float defVal) {
@@ -302,7 +302,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*
     std::printf("Crack added at (%.2f, %.2f, %.2f). Total: %d\n", p.x, p.y, p.z, gCrackCount);
 }
 
-// ========== Shaders (Fixed Flow + POM) ==========
+// ========== Shaders (Fixed Flow + ULTRA HIGH QUALITY POM) ==========
 
 static const char* VS = R"(
 #version 450 core
@@ -399,32 +399,24 @@ vec2 stressWarp(vec2 uv, float seed){
 }
 
 // --- Heightmap Function (Updated to use rNorm from 3D distance) ---
-// uv: The projected texture coordinate
-// rNorm: The NORMALIZED radius based on TRUE 3D DISTANCE (not UV length)
 float getHeight(vec2 uv, float rNorm, float seed){
     
-    // Calculate Radial info from local UV (Direction only)
+    // Calculate Radial info from local UV
     float rProj = length(uv) + 1e-6;
     vec2 nRad = uv / rProj;
     vec2 nTan = vec2(-nRad.y, nRad.x);
     
-    // Decompose UV into Radial and Tangential components
     float rComp = dot(uv, nRad);
     float tComp = dot(uv, nTan);
     
-    // --- KEY FIX FROM MAIN0: Use rNorm (True 3D) for Compression ---
-    // If we used length(uv) here, it would stretch on cube sides.
+    // Flow Compression (based on True 3D Distance rNorm)
     float tCompress = mix(1.0, 0.35, smoothstep(0.6, 1.0, rNorm));
     
-    // Reconstruct coordinate with "flow" compression
     vec2 localAniso = nRad * rComp + nTan * (tComp * tCompress);
 
-    // Density Scale also driven by True 3D distance
     float densityScale = mix(2.0, 0.6, rNorm);
-    
     vec2 coord = localAniso * (uScale * densityScale) + vec2(seed * 0.73, seed * 1.41);
 
-    // Stress Warp + Jitter 
     vec2 p = stressWarp(coord, seed); 
 
     // Worley Noise
@@ -438,11 +430,12 @@ float getHeight(vec2 uv, float rNorm, float seed){
     return 1.0 - clamp(crack + 0.5*micro, 0.0, 1.0);
 }
 
-// --- Parallax Occlusion Mapping ---
-// Now passes 'rNorm' through to getHeight so consistency is maintained
+// --- Parallax Occlusion Mapping (Ultra High Quality) ---
 vec2 parallaxMapping(vec2 uv, vec3 viewDir, float seed, float rNorm){
-    float minLayers = 8.0;
-    float maxLayers = 32.0;
+    // [UPDATE] Increased layer count another 8x (512 - 2048)
+    float minLayers = 512.0;
+    float maxLayers = 2048.0;
+    
     float numLayers = mix(maxLayers, minLayers, abs(viewDir.z));
     
     float layerDepth = 1.0 / numLayers;
@@ -496,14 +489,14 @@ void main(){
         if(dot(fragN, crackN) < -0.1) continue;
 
         vec3 delta = vPos - center;
-        float dist3D = length(delta); // True 3D distance
+        float dist3D = length(delta); 
 
         // Project onto tangent plane for UVs
         vec3 T = uCrackU[i];
         vec3 B = uCrackV[i];
         vec2 localUV = vec2(dot(delta, T), dot(delta, B));
 
-        // 3. Random Radius & Masking
+        // Random Radius & Masking
         float angDir = atan(localUV.y, localUV.x);
         float ang01  = (angDir + 3.14159265) / 6.2831853;
         float sector = floor(ang01 * 48.0);
@@ -517,20 +510,17 @@ void main(){
         float mask = 1.0 - smoothstep(outerR, outerR + 0.05, dist3D);
         if(mask <= 0.01) continue;
 
-        // --- FIXED FLOW LOGIC ---
-        // Calculate rNorm based on True 3D Distance (Like main0)
-        // This ensures proper compression even on glancing angles/cube sides
+        // Flow Logic (True 3D Distance)
         float baseRadiusSafe = max(radius, 1e-4);
         float rNorm = clamp(dist3D / baseRadiusSafe, 0.0, 1.0);
 
-        // 4. Parallax Occlusion Mapping
+        // Parallax Occlusion Mapping
         mat3 TBN = transpose(mat3(T, B, crackN)); 
         vec3 viewDirTS = normalize(TBN * viewDirWorld);
 
-        // Pass rNorm (3D based) to POM and getHeight
         vec2 displacedUV = parallaxMapping(localUV, viewDirTS, seed, rNorm);
         
-        // 5. Get Height & Normal using rNorm
+        // Get Height & Normal
         float h = getHeight(displacedUV, rNorm, seed);
 
         // Compute Normal from Gradient
@@ -549,7 +539,7 @@ void main(){
         mat3 TBN_inv = mat3(T, B, crackN); 
         vec3 normWorld = normalize(TBN_inv * normTS);
         
-        // 6. Crack Lighting
+        // Lighting
         float diffCrack = max(dot(normWorld, lightDir), 0.0);
         vec3 diffuseCrack = diffCrack * uLightColor;
         
@@ -582,7 +572,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    std::string title = "Crack Demo: " + std::string(gCurrentShape == SHAPE_CUBE ? "Cube" : "Sphere") + " (FIXED FLOW + POM)";
+    std::string title = "Crack Demo: " + std::string(gCurrentShape == SHAPE_CUBE ? "Cube" : "Sphere") + " (Ultra POM Quality)";
     GLFWwindow* win = glfwCreateWindow(1280, 720, title.c_str(), nullptr, nullptr);
     if (!win) return -1;
     glfwMakeContextCurrent(win);

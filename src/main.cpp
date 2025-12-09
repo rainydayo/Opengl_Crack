@@ -5,6 +5,20 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <iomanip>
+#include <sstream>
+
+// ========== OS Specific for Memory Usage ==========
+#ifdef _WIN32
+#include <windows.h>
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib")
+#elif defined(__linux__)
+#include <unistd.h>
+#include <ios>
+#include <fstream>
+#endif
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
@@ -73,6 +87,28 @@ std::chrono::high_resolution_clock::time_point gCrackStartTime;
 // ========== Utils ==========
 static void die(const char* msg) {
     throw std::runtime_error(msg);
+}
+
+// Function to get Memory Usage in MB
+double getMemoryUsageMB() {
+#ifdef _WIN32
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
+        return double(pmc.WorkingSetSize) / (1024.0 * 1024.0);
+    }
+#elif defined(__linux__)
+    long rss = 0L;
+    FILE* fp = NULL;
+    if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+        return 0.0;
+    if (fscanf(fp, "%*s%ld", &rss) != 1) {
+        fclose(fp);
+        return 0.0;
+    }
+    fclose(fp);
+    return (double)rss * (double)sysconf(_SC_PAGESIZE) / (1024.0 * 1024.0);
+#endif
+    return 0.0;
 }
 
 static GLuint makeProg(const char* vs, const char* fs) {
@@ -622,10 +658,37 @@ int main() {
 
     glm::vec2 stressDir = glm::normalize(glm::vec2(1.0f, 0.3f));
 
+    // Performance Timing Vars
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
+
     while (!glfwWindowShouldClose(win)) {
         float now = float(glfwGetTime());
         deltaTime = now - lastFrame;
         lastFrame = now;
+
+        // --- Performance Evaluation ---
+        nbFrames++;
+        if (now - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+            // printf and reset timer
+            double fps = double(nbFrames) / (now - lastTime);
+            double memMB = getMemoryUsageMB();
+
+            std::stringstream ss;
+            ss << title << " | FPS: " << std::fixed << std::setprecision(2) << fps
+                << " | RAM: " << memMB << " MB" << " | Cracks: " << gCrackCount;
+
+            glfwSetWindowTitle(win, ss.str().c_str());
+
+            // Log to console for easy copy-paste evaluation
+            std::cout << "[Eval] FPS: " << std::setw(6) << fps
+                << " | RAM: " << std::setw(6) << memMB << " MB"
+                << " | Cracks: " << gCrackCount << std::endl;
+
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
+        // ------------------------------
 
         processInput(win);
 
